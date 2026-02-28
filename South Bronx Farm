@@ -1,0 +1,198 @@
+-- South Bronx Farm | ULTRA FAST 🔥 Xeno Owen
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local toolKeywords = {
+    water = {"water", "bottle"},
+    sugar = {"sugar", "block"},
+    gelatin = {"gelatin", "packet"},
+    bag = {"empty", "bolsa vacia", "marshmallow empty"}
+}
+
+local stoveKeywords = {"stove", "pot", "cook", "kitchen"}
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoFarmGUI"
+screenGui.ResetOnSpawn = false
+local guiParent = player:WaitForChild("PlayerGui")
+pcall(function() guiParent = game:GetService("CoreGui") end)
+screenGui.Parent = guiParent
+
+local frame = Instance.new("Frame")
+frame.Parent = screenGui
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(255,255,255)
+frame.Position = UDim2.new(0,10,0,10)
+frame.Size = UDim2.new(0,250,0,120)
+frame.Active = true
+frame.Draggable = true
+
+local title = Instance.new("TextLabel")
+title.Parent = frame
+title.BackgroundTransparency = 1
+title.Size = UDim2.new(1,0,0,30)
+title.Font = Enum.Font.GothamBold
+title.Text = "South Bronx Farm 🔥"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextScaled = true
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Parent = frame
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
+toggleBtn.Position = UDim2.new(0,20,0,40)
+toggleBtn.Size = UDim2.new(0,210,0,40)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.Text = "START FARM"
+toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+toggleBtn.TextScaled = true
+
+local status = Instance.new("TextLabel")
+status.Parent = frame
+status.BackgroundTransparency = 1
+status.Position = UDim2.new(0,20,0,85)
+status.Size = UDim2.new(0,210,0,30)
+status.Font = Enum.Font.Gotham
+status.Text = "OFF"
+status.TextColor3 = Color3.fromRGB(255,255,0)
+status.TextScaled = true
+status.TextWrapped = true
+
+local autoFarmToggled = false
+
+local function getRoot()
+    return player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function findTool(key)
+    local backpack = player.Backpack
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local n = string.lower(tool.Name)
+            if key == "bag" and (string.find(n, "sugar") or string.find(n, "block")) then
+                continue
+            end
+            for _, kw in ipairs(toolKeywords[key]) do
+                if string.find(n, kw) then
+                    return tool
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function equipTool(key, desc)
+    local tool = findTool(key)
+    if key == "bag" then
+        task.wait(0.8)
+        tool = findTool(key)
+    end
+    if tool then
+        local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:EquipTool(tool)
+            task.wait(0.6)
+            status.Text = "Equip: " .. tool.Name
+            return true
+        end
+    else
+        status.Text = "No " .. desc
+    end
+    return false
+end
+
+local function isStovePrompt(prompt)
+    local obj = prompt
+    while obj and obj ~= workspace do
+        local nameLow = string.lower(obj.Name)
+        for _, kw in ipairs(stoveKeywords) do
+            if string.find(nameLow, kw) then return true end
+        end
+        obj = obj.Parent
+    end
+    return false
+end
+
+local function fireStovePrompt()
+    local root = getRoot()
+    if not root then return false end
+    
+    local closest = nil
+    local minDist = math.huge
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") and obj.Enabled and isStovePrompt(obj) then
+            local part = obj:FindFirstAncestorWhichIsA("BasePart") or obj.Parent
+            if part:IsA("BasePart") then
+                local dist = (part.Position - root.Position).Magnitude
+                if dist < 20 and dist < minDist then
+                    minDist = dist
+                    closest = obj
+                end
+            end
+        end
+    end
+    
+    if closest then
+        closest.MaxActivationDistance = 100
+        closest.RequiresLineOfSight = false
+        closest.HoldDuration = 0
+        
+        pcall(fireproximityprompt, closest)
+        closest:InputHoldBegin()
+        task.wait(0.03)
+        closest:InputHoldEnd()
+        
+        status.Text = "Interactuando..."
+        return true
+    else
+        status.Text = "Acércate"
+        return false
+    end
+end
+
+local function doSequence()
+    if findTool("water") and findTool("sugar") and findTool("gelatin") then
+        equipTool("water", "Water")
+        task.wait(0.2)  -- ultra rápido para agua
+        fireStovePrompt()
+        task.wait(20)
+        
+        equipTool("sugar", "Sugar")
+        fireStovePrompt()
+        
+        equipTool("gelatin", "Gelatin")
+        fireStovePrompt()
+        
+        task.wait(46)
+        
+        equipTool("bag", "Empty Bag")
+        fireStovePrompt()
+        
+        status.Text = "Farmeo Terminado! 💰"
+    else
+        status.Text = "Faltan items"
+    end
+end
+
+toggleBtn.MouseButton1Click:Connect(function()
+    autoFarmToggled = not autoFarmToggled
+    if autoFarmToggled then
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(170,0,0)
+        toggleBtn.Text = "STOP"
+        status.Text = "ON"
+        task.spawn(function()
+            while autoFarmToggled do
+                pcall(doSequence)
+                task.wait(1)  -- ciclos muy rápidos
+            end
+        end)
+    else
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
+        toggleBtn.Text = "START FARM"
+        status.Text = "OFF"
+    end
+end)
+
+task.wait(1)
+print("🟢 ULTRA FAST LOADED!")
