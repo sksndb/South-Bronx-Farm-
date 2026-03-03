@@ -68,13 +68,9 @@ local function findTool(key)
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") then
             local n = string.lower(tool.Name)
-            if key == "bag" and (string.find(n, "sugar") or string.find(n, "block")) then
-                continue
-            end
+            if key == "bag" and (string.find(n, "sugar") or string.find(n, "block")) then continue end
             for _, kw in ipairs(toolKeywords[key]) do
-                if string.find(n, kw) then
-                    return tool
-                end
+                if string.find(n, kw) then return tool end
             end
         end
     end
@@ -83,15 +79,12 @@ end
 
 local function equipTool(key, desc)
     local tool = findTool(key)
-    if key == "bag" then
-        task.wait(0.5)
-        tool = findTool(key)
-    end
+    if key == "bag" then task.wait(0.5) tool = findTool(key) end
     if tool then
         local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             hum:EquipTool(tool)
-            task.wait(0.5)
+            task.wait(0.3)
             status.Text = "Equip: " .. tool.Name
             return true
         end
@@ -153,11 +146,12 @@ end
 local function doSequence()
     if findTool("water") and findTool("sugar") and findTool("gelatin") then
         equipTool("water", "Water")
-        task.wait(0.3)
+        task.wait(0.2)
         fireStovePrompt()
         task.wait(20)
         
         equipTool("sugar", "Sugar")
+        task.wait(0.2)
         fireStovePrompt()
         
         equipTool("gelatin", "Gelatin")
@@ -169,7 +163,7 @@ local function doSequence()
         equipTool("bag", "Empty Bag")
         fireStovePrompt()
         
-        status.Text = "Farmeo Terminado! 💰"
+        status.Text = "Ciclo OK! 💰"
     else
         status.Text = "Faltan items"
     end
@@ -184,7 +178,7 @@ toggleBtn.MouseButton1Click:Connect(function()
         task.spawn(function()
             while autoFarmToggled do
                 pcall(doSequence)
-                task.wait(1)
+                task.wait(0.8)
             end
         end)
     else
@@ -195,4 +189,4 @@ toggleBtn.MouseButton1Click:Connect(function()
 end)
 
 task.wait(1)
-print("🟢 SCRIPT LOADED!")
+print("🟢 ULTRA FAST LOADED!")
