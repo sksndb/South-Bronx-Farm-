@@ -163,7 +163,7 @@ local function doSequence()
         equipTool("bag", "Empty Bag")
         fireStovePrompt()
         
-        status.Text = "Ciclo OK! 💰"
+        status.Text = "Farmeo Terminado! 💰"
     else
         status.Text = "Faltan items"
     end
