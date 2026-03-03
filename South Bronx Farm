@@ -151,11 +151,11 @@ local function doSequence()
         task.wait(20)
         
         equipTool("sugar", "Sugar")
-        task.wait(0.2)
+        task.wait(0.4)
         fireStovePrompt()
         
         equipTool("gelatin", "Gelatin")
-        task.wait(0.6)
+        task.wait(0.4)
         fireStovePrompt()
         
         task.wait(46)
