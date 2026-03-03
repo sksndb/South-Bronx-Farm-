@@ -155,7 +155,7 @@ local function doSequence()
         fireStovePrompt()
         
         equipTool("gelatin", "Gelatin")
-        task.wait(0.8)
+        task.wait(0.6)
         fireStovePrompt()
         
         task.wait(46)
