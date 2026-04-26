@@ -146,19 +146,19 @@ end
 local function doSequence()
     if findTool("water") and findTool("sugar") and findTool("gelatin") then
         equipTool("water", "Water")
-        task.wait(0.2)
+        task.wait(0.1)
         fireStovePrompt()
         task.wait(20)
         
         equipTool("sugar", "Sugar")
-        task.wait(0.4)
+        task.wait(0.3)
         fireStovePrompt()
         
         equipTool("gelatin", "Gelatin")
-        task.wait(0.4)
+        task.wait(0.3)
         fireStovePrompt()
         
-        task.wait(46)
+        task.wait(45)
         
         equipTool("bag", "Empty Bag")
         fireStovePrompt()
